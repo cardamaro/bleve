@@ -27,6 +27,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/blevesearch/bleve/index/store"
 	"github.com/blevesearch/bleve/registry"
@@ -72,6 +73,15 @@ func New(mo store.MergeOperator, config map[string]interface{}) (store.KVStore, 
 	ro, ok := config["read_only"].(bool)
 	if ok {
 		bo.ReadOnly = ro
+	}
+
+	timeout, ok := config["timeout"].(string)
+	if ok {
+		if d, err := time.ParseDuration(timeout); err != nil {
+			return nil, err
+		} else {
+			bo.Timeout = d
+		}
 	}
 
 	db, err := bolt.Open(path, 0600, bo)
